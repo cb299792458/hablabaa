@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios'
 import './App.css'
+import ChatBox from './components/ChatBox';
 
 function App() {
     const [apples, setApples] = useState<Apple[]>([])
@@ -19,6 +20,7 @@ function App() {
 
     return (
         <>
+            <ChatBox />
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {apples.map((apple, index) => (
                     <div className="bg-white rounded-lg shadow-md overflow-hidden" key={index}>
