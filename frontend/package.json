@@ -1,41 +1,61 @@
 {
-  "name": "hablabaa",
+  "name": "frontend",
+  "version": "0.1.0",
   "private": true,
-  "version": "0.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
-  },
   "dependencies": {
     "@fortawesome/free-solid-svg-icons": "^6.5.2",
-    "@fortawesome/react-fontawesome": "^0.2.2",
-    "axios": "^1.7.2",
+    "@fortawesome/react-fontawesome": "^0.2.0",
+    "@testing-library/jest-dom": "^5.17.0",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^13.5.0",
+    "@types/jest": "^27.5.2",
+    "@types/node": "^16.18.96",
+    "@types/react": "^18.2.75",
+    "@types/react-dom": "^18.2.24",
+    "axios": "^1.6.8",
     "lodash": "^4.17.21",
-    "openai": "^4.52.0",
-    "posthog-js": "^1.140.1",
+    "normalize.css": "^8.0.1",
+    "openai": "^4.38.1",
+    "posthog-js": "^1.139.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-modal": "^3.16.1",
-    "react-speech-recognition": "^3.10.0"
+    "react-scripts": "^5.0.1",
+    "react-speech-recognition": "^3.10.0",
+    "typescript": "^4.9.5",
+    "web-vitals": "^2.1.4"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   },
   "devDependencies": {
-    "@types/dotenv": "^8.2.0",
-    "@types/lodash": "^4.17.5",
-    "@types/node": "^20.14.8",
-    "@types/react": "^18.2.66",
-    "@types/react-dom": "^18.2.22",
+    "@babel/plugin-proposal-private-property-in-object": "^7.16.7",
+    "@types/lodash": "^4.17.0",
+    "@types/react-modal": "^3.16.3",
     "@types/react-speech-recognition": "^3.9.5",
-    "@typescript-eslint/eslint-plugin": "^7.2.0",
-    "@typescript-eslint/parser": "^7.2.0",
-    "@vitejs/plugin-react": "^4.2.1",
-    "dotenv": "^16.4.5",
-    "eslint": "^8.57.0",
-    "eslint-plugin-react-hooks": "^4.6.0",
-    "eslint-plugin-react-refresh": "^0.4.6",
-    "typescript": "^5.2.2",
-    "vite": "^5.2.0"
+    "autoprefixer": "^10.4.19",
+    "postcss": "^8.4.38",
+    "tailwindcss": "^3.4.3"
   }
 }

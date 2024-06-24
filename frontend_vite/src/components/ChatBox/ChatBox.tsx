@@ -2,7 +2,7 @@ import React from "react";
 import axios from "axios";
 
 import OpenAI from "openai";
-import { ChatCompletionMessageParam } from "openai/resources";
+import { ChatCompletionMessageParam } from "openai/resources/chat/completions.mjs";
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 
 import { Language, Message, Options, languageNames } from "../../types";
@@ -103,12 +103,12 @@ const ChatBox: React.FC = () => {
         if (!focused || thinking || speaking) {
             resetTranscript();
             return;
-        };
+        }
         if (finalTranscript) {
             addMessage(finalTranscript);
             resetTranscript();
             setInput("");
-        };
+        }
         // eslint-disable-next-line
     }, [interimTranscript, finalTranscript, messages]);
     React.useEffect(() => {
@@ -143,7 +143,7 @@ const ChatBox: React.FC = () => {
                 });
                 if (completion.choices && completion.choices.length) {
                     text = completion.choices[0].message.content || '';
-                };
+                }
             // }
 
             const translation = await getTranslation(text);
