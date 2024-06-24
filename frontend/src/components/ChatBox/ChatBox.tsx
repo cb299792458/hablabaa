@@ -1,6 +1,6 @@
 import React from "react";
 import axios from "axios";
-
+import { delay } from "lodash";
 import OpenAI from "openai";
 import { ChatCompletionMessageParam } from "openai/resources";
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
@@ -9,8 +9,9 @@ import { Language, Message, Options, languageNames } from "../../types";
 import MessageRow from "../MessageRow";
 import WelcomeModal from "../WelcomeModal";
 import OptionsModal from "../OptionsModal";
-import { delay } from "lodash";
 import DictionaryModal from "../DictionaryModal";
+import SessionModal from "../SessionModal";
+
 import { blueButtonClass, greenButtonClass, h1Class } from "../../styles";
 
 const googleCloudApiKey: string | undefined = process.env.REACT_APP_GOOGLE_CLOUD_API_KEY;
@@ -20,11 +21,14 @@ const openAiApiKey: string | undefined = process.env.REACT_APP_OPENAI_API_KEY;
 const openai = new OpenAI({ apiKey: openAiApiKey, dangerouslyAllowBrowser: true });
 
 const ChatBox: React.FC = () => {
-    const [showWelcomeModal, setShowWelcomeModal] = React.useState<boolean>(false);
+    const [showWelcomeModal, setShowWelcomeModal] = React.useState<boolean>(true);
     const [showOptionsModal, setShowOptionsModal] = React.useState<boolean>(false);
     const [showDictionaryModal, setShowDictionaryModal] = React.useState<boolean>(false);
+    const [showSessionModal, setShowSessionModal] = React.useState<boolean>(false);
+
     const [userName, setUserName] = React.useState<string>("Guest");
     const [botName, setBotName] = React.useState<string>("Niki");
+    const [email, setEmail] = React.useState<string>("");
     const [options, setOptions] = React.useState<Options>({
         autoplayResponseAudio: true,
         hideUserMessageText: false,
@@ -32,7 +36,7 @@ const ChatBox: React.FC = () => {
         hideResponseText: false,
         hideResponseTranslation: false,
     });
-    const focused = !showOptionsModal && !showWelcomeModal;
+    const focused = !showOptionsModal && !showWelcomeModal && !showDictionaryModal;
     
     const [practiceLanguage, setPracticeLanguage] = React.useState<string>("es-ES");
     const [preferredLanguage, setPreferredLanguage] = React.useState<string>("en-US");
@@ -89,15 +93,19 @@ const ChatBox: React.FC = () => {
     } = useSpeechRecognition();
     
     const listenContinuously = () => {
-        if (showOptionsModal || showOptionsModal) return;
+        if (!focused){
+            SpeechRecognition.stopListening();
+            return () => {};
+        };
         SpeechRecognition.startListening({
             continuous: true,
             language: practiceLanguage,
         });
+
+        return () => SpeechRecognition.stopListening();
     };
     
-    React.useEffect(() => setShowWelcomeModal(true), []);
-    React.useEffect(listenContinuously, [showWelcomeModal, showOptionsModal, practiceLanguage]);
+    React.useEffect(listenContinuously, [focused, practiceLanguage]);
     React.useEffect(() => {if (transcript && listening && !thinking && !speaking && focused) setInput(transcript)}, [transcript, listening, thinking, speaking, focused]);
     React.useEffect(() => {
         if (!focused || thinking || speaking) {
@@ -184,6 +192,12 @@ const ChatBox: React.FC = () => {
     if (!SpeechRecognition.browserSupportsSpeechRecognition()) return <h1>Your browser does not support speech recognition software! Try Chrome desktop, maybe?</h1>;
     return (
         <div>
+            <SessionModal
+                showSessionModal={showSessionModal}
+                setShowSessionModal={setShowSessionModal}
+                email={email}
+                setEmail={setEmail}
+            />
             <WelcomeModal 
                 showWelcomeModal={showWelcomeModal}
                 setShowWelcomeModal={setShowWelcomeModal}
@@ -220,6 +234,12 @@ const ChatBox: React.FC = () => {
                 className={greenButtonClass}
             >
                 Translation Dictionary
+            </button>
+            <button
+                onClick={() => setShowSessionModal(!showSessionModal)}
+                className={greenButtonClass}
+            >
+                Load Conversation
             </button>
 
             <div className="flex justify-center items-center">

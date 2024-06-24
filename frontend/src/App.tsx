@@ -1,13 +1,15 @@
 import './App.css';
 import ChatBox from './components/ChatBox';
-// import PostHogComponent from './components/PostHogComponent';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 
 function App() {
+    const googleClientId = process.env.REACT_APP_GOOGLE_CLIENT_ID || '';
     return (
-        <div className="App">
-            <ChatBox />
-            {/* <PostHogComponent /> */}
-        </div>
+        <GoogleOAuthProvider clientId={googleClientId}>
+            <div className="App">
+                <ChatBox />
+            </div>
+        </GoogleOAuthProvider>
     );
 }
 
