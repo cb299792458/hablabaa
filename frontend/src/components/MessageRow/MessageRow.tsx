@@ -5,7 +5,7 @@ import { faPen, faLanguage, faEarListen, faEye } from '@fortawesome/free-solid-s
 
 import { MessageRowProps } from "../../types";
 
-const MessageRow: React.FC<MessageRowProps> = ({ message, userName, botName, options, speaking, setSpeaking }) => {
+const MessageRow: React.FC<MessageRowProps> = ({ message, userName, botName, options, speaking, setSpeaking, loading }) => {
     return (
         <tr>
             <td className="border">{message.fromUser
@@ -24,6 +24,7 @@ const MessageRow: React.FC<MessageRowProps> = ({ message, userName, botName, opt
                 language={message.fromUser ? message.source : message.target}
                 speaking={speaking}
                 setSpeaking={setSpeaking}
+                loading={loading}
             />
         </tr>
     );
@@ -61,12 +62,15 @@ const MessageTranslation = ({ translation, initiallyVisible }: { translation: st
     );
 };
 
-const MessageAudio = React.memo(({ text, autoplay, language, speaking, setSpeaking }: { text: string, autoplay: boolean, language: string, speaking: boolean, setSpeaking: (speaking: boolean) => void }) => {
+const MessageAudio = React.memo((
+    { text, autoplay, language, speaking, setSpeaking, loading } : 
+    { text: string, autoplay: boolean, language: string, speaking: boolean, setSpeaking: (speaking: boolean) => void, loading: boolean }
+) => {
     // preload voices
     window.speechSynthesis.getVoices();
     
     const readMessage = async () => {
-        if (speaking) return;
+        if (speaking || loading) return;
         if ('speechSynthesis' in window) {
             setSpeaking(true);
             const msg = new SpeechSynthesisUtterance(text);

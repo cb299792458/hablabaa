@@ -13,13 +13,15 @@ const SessionModal = ({
     setShowSessionModal,
     email,
     setEmail,
-    loadConversation
+    loadConversation,
+    saveConversation,
 }: {
     showSessionModal: boolean,
     setShowSessionModal: (showSessionModal: boolean) => void,
     email: string,
     setEmail: (email: string) => void,
-    loadConversation: (conversationId: number) => void
+    loadConversation: (conversationId: number) => void,
+    saveConversation: () => Promise<Conversation>,
 }) => {
     const [error, setError] = React.useState<string>('');
     const [conversations, setConversations] = React.useState<Conversation[]>([]);
@@ -34,9 +36,15 @@ const SessionModal = ({
                 console.error(err);
                 setError('Sorry, we couldn\'t load your conversations.\nTry again later.');
             }
+            
+            const currentConversation = await saveConversation();
+            if (Object.keys(currentConversation).length) {
+                setConversations((conversations) => [...conversations, currentConversation]);
+            }
         };
         loadConversations();
-    }, [email]);
+
+    }, [email, saveConversation]);
 
     const handleSuccess = (response: CredentialResponse) => {
         try {

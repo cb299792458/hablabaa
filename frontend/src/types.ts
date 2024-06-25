@@ -13,6 +13,7 @@ export interface MessageRowProps {
     options: Options;
     speaking: boolean;
     setSpeaking: (speaking: boolean) => void;
+    loading: boolean;
 }
 
 export enum Language {

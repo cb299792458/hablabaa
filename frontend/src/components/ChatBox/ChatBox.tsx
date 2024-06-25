@@ -27,7 +27,7 @@ const ChatBox: React.FC = () => {
     const [showDictionaryModal, setShowDictionaryModal] = React.useState<boolean>(false);
     const [showSessionModal, setShowSessionModal] = React.useState<boolean>(false);
 
-    const [conversationId, setConversationId] = React.useState<number>(-1);
+    const [conversationId, setConversationId] = React.useState<number>(0);
     const [startedAt, setStartedAt] = React.useState<Date>(new Date());
 
     const [userName, setUserName] = React.useState<string>("Guest");
@@ -50,6 +50,7 @@ const ChatBox: React.FC = () => {
 
     const [speaking, setSpeaking] = React.useState<boolean>(false);
     const [thinking, setThinking] = React.useState<boolean>(false);
+    const [loading, setLoading] = React.useState<boolean>(false);
     
     const getTranslation = async (text: string) => {
         if (practiceLanguage === preferredLanguage) return text;
@@ -98,6 +99,7 @@ const ChatBox: React.FC = () => {
         listening,
     } = useSpeechRecognition();
     
+
     const listenContinuously = () => {
         if (!focused){
             SpeechRecognition.stopListening();
@@ -189,9 +191,8 @@ const ChatBox: React.FC = () => {
 
     // save message
     const saveMessage = async (message: Message, conversationId: number) => {
-        // is the conversationId valid?
-        if (conversationId === -1) return;
-        const res =  await axios.post(process.env.REACT_APP_API_BASE_URL + "/apples/messages/", {
+        if (!conversationId) return;
+        await axios.post(process.env.REACT_APP_API_BASE_URL + "/apples/messages/", {
             conversationId,
             fromUser: message.fromUser,
             source: message.source,
@@ -199,33 +200,35 @@ const ChatBox: React.FC = () => {
             text: message.text,
             translation: message.translation,
         });
-        return res
     };
 
     // save conversation
     const saveConversation = async () => {
-        if (!email || !messages.length) return;
-        if (conversationId === -1) {
-            const res = await axios.post(process.env.REACT_APP_API_BASE_URL + "/apples/conversation/", {
-                userName,
-                botName,
-                practiceLanguage,
-                preferredLanguage,
-                startedAt,
-                email
-            })
-            setConversationId(() => res.data.id);
-            setStartedAt(new Date(res.data.startedAt));
+        if (!email || !messages.length || conversationId) return {};
+        const res = await axios.post(process.env.REACT_APP_API_BASE_URL + "/apples/conversation/", {
+            userName,
+            botName,
+            practiceLanguage,
+            preferredLanguage,
+            startedAt,
+            email
+        });
+        setConversationId(() => res.data.id);
+        setStartedAt(new Date(res.data.startedAt));
 
-            // save existing messages
-            for (let message of messages) {
-                await saveMessage(message, res.data.id);
-            }
-        }
-    }
+        // save existing messages
+        for (let message of messages) {
+            await saveMessage(message, res.data.id);
+        };
+
+        console.log(res.data)
+        return res.data;
+    };
 
     // load conversation
     const loadConversation = async (conversationId: number) => {
+        setLoading(() => true);
+
         const conversationRes = await axios.get(
             process.env.REACT_APP_API_BASE_URL + 
             `/apples/conversation/`,
@@ -240,9 +243,6 @@ const ChatBox: React.FC = () => {
         );
         const messages = messagesRes.data;
 
-        // const {autoplayResponseAudio} = options;
-        // setOptions((prev) => ({...prev, autoplayResponseAudio: false}));
-
         setConversationId(conversation.id);
         setStartedAt(new Date(conversation.startedAt));
         setUserName(conversation.userName);
@@ -251,16 +251,8 @@ const ChatBox: React.FC = () => {
         setPreferredLanguage(conversation.preferredLanguage);
         setMessages(messages);
 
-        // setTimeout(() => setOptions((prev) => ({...prev, autoplayResponseAudio})), 100);
-        // setOptions((prev) => ({...prev, autoplayResponseAudio}));
+        setTimeout(() => setLoading(() => false), 500);
     }
-
-    React.useEffect(() => {
-        if (!email) return;
-        saveConversation();
-    // eslint-disable-next-line
-    }, [email]);
-
 
     const handleToggleMode = () => {
         setInput("");
@@ -285,6 +277,7 @@ const ChatBox: React.FC = () => {
                 email={email}
                 setEmail={setEmail}
                 loadConversation={loadConversation}
+                saveConversation={saveConversation}
             />
             <WelcomeModal 
                 showWelcomeModal={showWelcomeModal}
@@ -385,8 +378,8 @@ const ChatBox: React.FC = () => {
                                 options={options} 
                                 speaking={speaking}
                                 setSpeaking={setSpeaking}
-                                />
-                            )}
+                                loading={loading}
+                            />)}
                         </tbody>
                     </table>
                 </div>
@@ -422,7 +415,7 @@ const ChatBox: React.FC = () => {
             </div>
 
             <h4
-                className="absolute bottom-0 text-gray-500 p-4 w-full text-center"
+                className="relative bottom-0 text-gray-500 p-4 w-full text-center"
             >
                 Developed by <a className="text-blue-500 font-bold" href="https://www.linkedin.com/in/brian-lam-software-developer/">Brian Lam</a>
             </h4>
