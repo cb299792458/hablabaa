@@ -10,12 +10,19 @@ class Apple(models.Model):
         return self.name
 
 class Conversation(models.Model):
-    userId = models.CharField(max_length=100)
     userName = models.CharField(max_length=100)
     botName = models.CharField(max_length=100)
     practiceLanguage = models.CharField(max_length=100)
     preferredLanguage = models.CharField(max_length=100)
     startedAt = models.DateTimeField(auto_now_add=True)
-    
-    def __str__(self):
-        return f'{self.userName}\'s conversation with {self.botName} in {self.practiceLanguage} from {self.startedAt}'
+    email = models.CharField(max_length=100)
+
+class Message(models.Model):
+    conversation = models.ForeignKey(Conversation, related_name='messages', on_delete=models.CASCADE)
+    fromUser = models.BooleanField()
+    source = models.CharField(max_length=100)
+    target = models.CharField(max_length=100)
+    text = models.TextField()
+    translation = models.TextField()
+    createdAt = models.DateTimeField(auto_now_add=True)
+

@@ -73,7 +73,7 @@ const MessageAudio = React.memo(({ text, autoplay, language, speaking, setSpeaki
 
             const allVoices = await window.speechSynthesis.getVoices();
             const voice = allVoices.find((voice) => voice.lang !== 'en-US' && voice.lang === language);
-            const defaultVoice = allVoices.find((voice) => voice.name === "Microsoft Zira - English (United States)");
+            const defaultVoice = allVoices.find((voice) => voice.name === "Microsoft Zira - English (United States)") || allVoices[0];
             if (voice) {
                 msg.voice = voice;
             } else {

@@ -1,7 +1,7 @@
 import React from "react";
 import axios from "axios";
 
-import OpenAI from "openai";
+import OpenAI from "openai/index.mjs";
 import { ChatCompletionMessageParam } from "openai/resources/chat/completions.mjs";
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 

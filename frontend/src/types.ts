@@ -46,10 +46,22 @@ Object.keys(Language).forEach((key) => {
     languageNames[value] = key;
 });
 
+export interface Conversation {
+    id: number;
+    userName: string;
+    botName: string;
+    practiceLanguage: Language;
+    preferredLanguage: Language;
+    startedAt: Date;
+    email: string;
+}
+
 export interface Message {
+    conversationId: number;
     fromUser: boolean;
     source: Language;
     target: Language;
     text: string;
     translation: string;
+    createdAt: Date;
 }

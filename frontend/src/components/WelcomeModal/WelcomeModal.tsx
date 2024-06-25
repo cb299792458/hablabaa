@@ -18,6 +18,7 @@ const WelcomeModal = ({
     botName, setBotName,
     practiceLanguage, setPracticeLanguage,
     preferredLanguage, setPreferredLanguage,
+    setShowSessionModal,
 }: {
     showWelcomeModal: boolean,
     setShowWelcomeModal: (showWelcomeModal: boolean) => void,
@@ -29,6 +30,7 @@ const WelcomeModal = ({
     setPracticeLanguage: (practiceLanguage: string) => void,
     preferredLanguage: string,
     setPreferredLanguage: (preferredLanguage: string) => void,
+    setShowSessionModal: (showSessionModal: boolean) => void,
 }) => {
     const handleClick = () => {
         posthog.capture('conversation_started', {
@@ -38,6 +40,11 @@ const WelcomeModal = ({
             preferred_language: preferredLanguage,
         });
         setShowWelcomeModal(false);
+    }
+
+    const switchToSessionModal = () => {
+        setShowWelcomeModal(false);
+        setShowSessionModal(true);
     }
     return <Modal
         isOpen={showWelcomeModal}
@@ -84,9 +91,18 @@ const WelcomeModal = ({
             {Object.entries(Language).map(([name, code]) => <option value={code} key={code}>{name.replace('_', " ")}</option>)}
         </select><br/>
 
-        <button onClick={handleClick} className={blueButtonClass}>
-            Let's Chat!
-        </button>
+        <div
+            className="flex justify-between"
+        >
+
+            <button onClick={handleClick} className={blueButtonClass}>
+                Let's Chat!
+            </button>
+
+            <button onClick={switchToSessionModal} className={blueButtonClass}>
+                Sign In and Load Previous Conversation
+            </button>
+        </div>
     </Modal>
 }
 
