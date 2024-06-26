@@ -84,7 +84,7 @@ WSGI_APPLICATION = 'core.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
-
+POSTGRES_PASSWORD = env('POSTGRES_PASSWORD')
 DATABASES = {
     'default': {
         # 'ENGINE': 'django.db.backends.sqlite3',
@@ -92,9 +92,9 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'railway',
         'USER': 'postgres',
-        'PASSWORD': 'JuQHnKWcOBWqsGTFWJFtlaoJOpimROSS',
-        'HOST': 'roundhouse.proxy.rlwy.net',
-        'PORT': '14910',
+        'PASSWORD': POSTGRES_PASSWORD,
+        'HOST': 'viaduct.proxy.rlwy.net',
+        'PORT': '25244',
     }
 }
 

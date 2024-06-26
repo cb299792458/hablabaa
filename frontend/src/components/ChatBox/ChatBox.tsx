@@ -176,10 +176,12 @@ const ChatBox: React.FC = () => {
     // save message
     const saveMessage = async (message: Message, conversationId: number) => {
         if (!conversationId) {
-            if (email) await saveConversation();
-        } else {
-            return;
-        }
+            if (email) {
+                await saveConversation();
+            } else {
+                return;
+            };
+        };
 
         const body = {...message, conversationId};
         await axios.post(process.env.REACT_APP_API_BASE_URL + "/apples/messages/", body);
@@ -202,6 +204,7 @@ const ChatBox: React.FC = () => {
     // load conversation
     const loadConversation = async (conversationId: number) => {
         setLoading(true);
+        setMessages([]);
 
         const conversationRes = await axios.get(
             process.env.REACT_APP_API_BASE_URL + 
