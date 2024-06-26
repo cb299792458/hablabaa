@@ -12,13 +12,12 @@ posthog.init('phc_Kz2UulgJvjU0LU32hr7LzOyRn8entzJ77AmwAiMtMan',
 )
 
 const WelcomeModal = ({
-    showWelcomeModal,
-    setShowWelcomeModal,
-    userName, setUserName,
-    botName, setBotName,
+    showWelcomeModal, setShowWelcomeModal,
+    userName, setUserName, botName, setBotName,
     practiceLanguage, setPracticeLanguage,
     preferredLanguage, setPreferredLanguage,
-    setShowSessionModal,
+    setShowSessionModal, saveConversation, 
+    email, 
 }: {
     showWelcomeModal: boolean,
     setShowWelcomeModal: (showWelcomeModal: boolean) => void,
@@ -31,8 +30,10 @@ const WelcomeModal = ({
     preferredLanguage: string,
     setPreferredLanguage: (preferredLanguage: string) => void,
     setShowSessionModal: (showSessionModal: boolean) => void,
+    saveConversation: () => Promise<void>,
+    email: string,
 }) => {
-    const handleClick = () => {
+    const handleClick = async () => {
         posthog.capture('conversation_started', {
             user_name: userName,
             bot_name: botName,
@@ -40,6 +41,9 @@ const WelcomeModal = ({
             preferred_language: preferredLanguage,
         });
         setShowWelcomeModal(false);
+        if (email) {
+            await saveConversation();
+        }
     }
 
     const switchToSessionModal = () => {
@@ -94,14 +98,13 @@ const WelcomeModal = ({
         <div
             className="flex justify-between"
         >
-
             <button onClick={handleClick} className={blueButtonClass}>
                 Let's Chat!
             </button>
 
-            <button onClick={switchToSessionModal} className={blueButtonClass}>
+            {!email && <button onClick={switchToSessionModal} className={blueButtonClass}>
                 Sign In and Load Previous Conversation
-            </button>
+            </button>}
         </div>
     </Modal>
 }

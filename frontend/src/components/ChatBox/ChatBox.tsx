@@ -175,42 +175,33 @@ const ChatBox: React.FC = () => {
 
     // save message
     const saveMessage = async (message: Message, conversationId: number) => {
-        if (!conversationId) return;
-        await axios.post(process.env.REACT_APP_API_BASE_URL + "/apples/messages/", {
-            conversationId,
-            fromUser: message.fromUser,
-            source: message.source,
-            target: message.target,
-            text: message.text,
-            translation: message.translation,
-        });
+        if (!conversationId) {
+            if (email) await saveConversation();
+        } else {
+            return;
+        }
+
+        const body = {...message, conversationId};
+        await axios.post(process.env.REACT_APP_API_BASE_URL + "/apples/messages/", body);
     };
 
     // save conversation
     const saveConversation = async () => {
-        if (!email || !messages.length || conversationId) return {};
-        const res = await axios.post(process.env.REACT_APP_API_BASE_URL + "/apples/conversation/", {
-            userName,
-            botName,
-            practiceLanguage,
-            preferredLanguage,
-            startedAt,
-            email
-        });
+        if (!email || conversationId) return {};
+        const body = {userName, botName, practiceLanguage, preferredLanguage, startedAt, email};
+        const res = await axios.post(process.env.REACT_APP_API_BASE_URL + "/apples/conversation/", body);
         setConversationId(() => res.data.id);
         setStartedAt(new Date(res.data.startedAt));
 
         // save existing messages
-        for (let message of messages) {
-            await saveMessage(message, res.data.id);
-        };
+        for (let message of messages) await saveMessage(message, res.data.id);
 
         return res.data;
     };
 
     // load conversation
     const loadConversation = async (conversationId: number) => {
-        setLoading(() => true);
+        setLoading(true);
 
         const conversationRes = await axios.get(
             process.env.REACT_APP_API_BASE_URL + 
@@ -237,6 +228,19 @@ const ChatBox: React.FC = () => {
         setTimeout(() => setLoading(() => false), 500);
     }
 
+    const createNewConversation = async () => {
+        setConversationId(0);
+        setStartedAt(new Date());
+        setUserName("Guest");
+        setBotName("Niki");
+        setPracticeLanguage("es-ES");
+        setPreferredLanguage("en-US");
+        setMessages([]);
+        
+        setShowSessionModal(false);
+        setShowWelcomeModal(true);
+    };
+
     const handleToggleMode = () => {
         setInput("");
         if (listening) {
@@ -262,7 +266,9 @@ const ChatBox: React.FC = () => {
                 loadConversation={loadConversation}
                 saveConversation={saveConversation}
                 conversationId={conversationId}
-            />
+                messagesLength={messages.length}
+                createNewConversation={createNewConversation}
+                />
             <WelcomeModal 
                 showWelcomeModal={showWelcomeModal}
                 setShowWelcomeModal={setShowWelcomeModal}
@@ -275,6 +281,8 @@ const ChatBox: React.FC = () => {
                 preferredLanguage={preferredLanguage}
                 setPreferredLanguage={setPreferredLanguage}
                 setShowSessionModal={setShowSessionModal}
+                saveConversation={saveConversation}
+                email={email}
             />
             <OptionsModal
                 showOptionsModal={showOptionsModal}
@@ -293,19 +301,19 @@ const ChatBox: React.FC = () => {
                 originalLanguage={preferredLanguage as Language}
             />
 
-            <h1 className={h1Class}>Chat Ni Ichi</h1>
-            <br/>
+            <h1 className={h1Class}>Chat Ni Ichi</h1><br/>
+
             <button
                 onClick={() => setShowDictionaryModal(!showDictionaryModal)}
-                className={greenButtonClass}
+                className={greenButtonClass + ' mr-2'}
             >
                 Translation Dictionary
             </button>
             <button
                 onClick={() => setShowSessionModal(!showSessionModal)}
-                className={greenButtonClass}
+                className={greenButtonClass + ' ml-2'}
             >
-                Load Conversation
+                Manage Conversations
             </button>
 
             <div className="flex justify-center items-center">
@@ -328,9 +336,7 @@ const ChatBox: React.FC = () => {
                         {listening ? '<- This is what I\'ve heard!' : '-> Send your typed message!'}
                     </button>
                 </form>
-            </div>
-
-            <br/>
+            </div><br/>
 
             <div id="main" className="flex">
                 <div id="left" className="p-4 min-w-[320px] flex flex-col items-center">
@@ -401,7 +407,13 @@ const ChatBox: React.FC = () => {
             <h4
                 className="relative bottom-0 text-gray-500 p-4 w-full text-center"
             >
-                Developed by <a className="text-blue-500 font-bold" href="https://www.linkedin.com/in/brian-lam-software-developer/">Brian Lam</a>
+                <p>
+                    Developed by <a className="text-green-700 font-bold" href="https://tinyurl.com/brian-lam">Brian Lam</a>
+                </p>
+                <p>
+                    <a className="text-green-700 font-bold" href="https://www.linkedin.com/in/brian-lam-software-developer/">LinkedIn</a>
+                    {" | "}<a className="text-green-700 font-bold" href="https://github.com/cb299792458/hablabaa">GitHub</a>
+                </p>
             </h4>
         </div>
     );
