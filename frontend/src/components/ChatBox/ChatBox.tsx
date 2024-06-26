@@ -1,7 +1,6 @@
 import React from "react";
 import axios from "axios";
 import { delay } from "lodash";
-import OpenAI from "openai";
 import { ChatCompletionMessageParam } from "openai/resources";
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 
@@ -15,10 +14,6 @@ import SessionModal from "../SessionModal";
 import { blueButtonClass, greenButtonClass, h1Class } from "../../styles";
 
 const googleCloudApiKey: string | undefined = process.env.REACT_APP_GOOGLE_CLOUD_API_KEY;
-
-// TODO: move this to the backend and remove dangerouslyAllowBrowser
-const openAiApiKey: string | undefined = process.env.REACT_APP_OPENAI_API_KEY;
-const openai = new OpenAI({ apiKey: openAiApiKey, dangerouslyAllowBrowser: true });
 
 const ChatBox: React.FC = () => {
     const [showWelcomeModal, setShowWelcomeModal] = React.useState<boolean>(false);
@@ -148,22 +143,11 @@ const ChatBox: React.FC = () => {
             
             let text: string = '';
 
-            // try {
-            //     const res = await axios.post(
-            //         `${process.env.REACT_APP_API_BASE_URL}/chatbot/chat/`,
-            //         {messages: systemMessage.concat(pastMessages)},
-            //     );
-            //     text = res.data.message;
-            // } catch {
-                const completion = await openai.chat.completions.create({
-                    messages: systemMessage.concat(pastMessages),
-                    model: "gpt-3.5-turbo",
-                    max_tokens: 100,
-                });
-                if (completion.choices && completion.choices.length) {
-                    text = completion.choices[0].message.content || '';
-                };
-            // }
+            const res = await axios.post(
+                `${process.env.REACT_APP_API_BASE_URL}/chatbot/`,
+                {messages: systemMessage.concat(pastMessages)},
+            );
+            text = res.data.message;
 
             const translation = await getTranslation(text);
             
