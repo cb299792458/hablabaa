@@ -205,7 +205,6 @@ const ChatBox: React.FC = () => {
             await saveMessage(message, res.data.id);
         };
 
-        console.log(res.data)
         return res.data;
     };
 
@@ -262,6 +261,7 @@ const ChatBox: React.FC = () => {
                 setEmail={setEmail}
                 loadConversation={loadConversation}
                 saveConversation={saveConversation}
+                conversationId={conversationId}
             />
             <WelcomeModal 
                 showWelcomeModal={showWelcomeModal}

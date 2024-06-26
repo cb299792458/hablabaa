@@ -1,10 +1,10 @@
 import React from 'react';
 import Modal from 'react-modal';
+import axios from 'axios';
 import { CredentialResponse, GoogleLogin } from "@react-oauth/google";
 
 import { Conversation, languageNames } from '../../types';
 import { modalStyle } from '../../styles';
-import axios from 'axios';
 
 Modal.setAppElement('#root');
 
@@ -15,6 +15,7 @@ const SessionModal = ({
     setEmail,
     loadConversation,
     saveConversation,
+    conversationId,
 }: {
     showSessionModal: boolean,
     setShowSessionModal: (showSessionModal: boolean) => void,
@@ -22,6 +23,7 @@ const SessionModal = ({
     setEmail: (email: string) => void,
     loadConversation: (conversationId: number) => void,
     saveConversation: () => Promise<Conversation>,
+    conversationId: number,
 }) => {
     const [error, setError] = React.useState<string>('');
     const [conversations, setConversations] = React.useState<Conversation[]>([]);
@@ -37,10 +39,7 @@ const SessionModal = ({
                 setError('Sorry, we couldn\'t load your conversations.\nTry again later.');
             }
             
-            const currentConversation = await saveConversation();
-            if (Object.keys(currentConversation).length) {
-                setConversations((conversations) => [...conversations, currentConversation]);
-            }
+            await saveConversation();
         };
         loadConversations();
 
@@ -79,7 +78,8 @@ const SessionModal = ({
             {conversations.map((conversation) => <li
                 key={conversation.id}
                 onClick={() => handleClick(conversation.id)}
-                className='cursor-pointer hover:bg-gray-200 p-2 rounded-md'
+                className={`cursor-pointer hover:bg-gray-200 p-2 rounded-md 
+                    ${conversationId === conversation.id ? 'font-bold' : ''}`}
             >
                 {`${conversation.userName}'s conversation with ${conversation.botName},
                 in ${languageNames[conversation.practiceLanguage]}, from
