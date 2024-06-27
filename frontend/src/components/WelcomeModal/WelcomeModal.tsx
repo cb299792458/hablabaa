@@ -57,18 +57,17 @@ const WelcomeModal = ({
     >
         <h2 className={h2Class}>Welcome!</h2>
         <p className="max-w-lg">
-        Welcome to Chat Ni Ichi! From late beginner/intermediate language learners
-        to fluent speakers, our advanced language-learning platform is tailored to
-        suit your needs. Harness the power of speech recognition, translation, and
-        machine learning to enhance your reading, listening, and speaking skills.
-        Take your language skills to the next level today!
-        <br/><br/>
-        Just speak in your chosen foreign language into your microphone, and when you
-        pause, the chat bot will respond in the same language. The transcriptions and
-        translations will be displayed on the screen. You can also type your message 
-        into the input box by clicking the input mode button. Enjoy!
+        Welcome to Hablabaa, a free app for language practice.
+        Try speaking in your chosen foreign language into your microphone, and when you
+        pause, the AI will respond in the same language. Transcriptions and
+        translations will also be shown to assist your understanding. You can also type your message 
+        instead by clicking the input button on the right. Enjoy! ¡Pa'lante! 加油!
         </p>
         <br/>
+
+        <div className="flex justify-center mb-4">
+            <img src='lambs.png' alt="lambs" className="w-80 h-auto max-w-full"/>
+        </div>
 
         Your Name:{" "}
         <input
@@ -96,7 +95,7 @@ const WelcomeModal = ({
         </select><br/>
 
         <div
-            className="flex justify-between"
+            className="flex justify-between mt-2"
         >
             <button onClick={handleClick} className={blueButtonClass}>
                 Let's Chat!
