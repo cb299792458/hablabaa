@@ -1,33 +1,30 @@
 import React from "react";
 import axios from "axios";
-import { delay } from "lodash";
-import { ChatCompletionMessageParam } from "openai/resources";
+
+import OpenAI from "openai/index.mjs";
+import { ChatCompletionMessageParam } from "openai/resources/chat/completions.mjs";
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 
 import { Language, Message, Options, languageNames } from "../../types";
 import MessageRow from "../MessageRow";
 import WelcomeModal from "../WelcomeModal";
 import OptionsModal from "../OptionsModal";
+import { delay } from "lodash";
 import DictionaryModal from "../DictionaryModal";
-import SessionModal from "../SessionModal";
-
 import { blueButtonClass, greenButtonClass, h1Class } from "../../styles";
 
 const googleCloudApiKey: string | undefined = process.env.REACT_APP_GOOGLE_CLOUD_API_KEY;
 
+// TODO: move this to the backend and remove dangerouslyAllowBrowser
+const openAiApiKey: string | undefined = process.env.REACT_APP_OPENAI_API_KEY;
+const openai = new OpenAI({ apiKey: openAiApiKey, dangerouslyAllowBrowser: true });
+
 const ChatBox: React.FC = () => {
     const [showWelcomeModal, setShowWelcomeModal] = React.useState<boolean>(false);
-    React.useEffect(() => setShowWelcomeModal(true), []);
     const [showOptionsModal, setShowOptionsModal] = React.useState<boolean>(false);
     const [showDictionaryModal, setShowDictionaryModal] = React.useState<boolean>(false);
-    const [showSessionModal, setShowSessionModal] = React.useState<boolean>(false);
-
-    const [conversationId, setConversationId] = React.useState<number>(0);
-    const [startedAt, setStartedAt] = React.useState<Date>(new Date());
-
     const [userName, setUserName] = React.useState<string>("Guest");
     const [botName, setBotName] = React.useState<string>("Niki");
-    const [email, setEmail] = React.useState<string>("");
     const [options, setOptions] = React.useState<Options>({
         autoplayResponseAudio: true,
         hideUserMessageText: false,
@@ -35,7 +32,7 @@ const ChatBox: React.FC = () => {
         hideResponseText: false,
         hideResponseTranslation: false,
     });
-    const focused = !showOptionsModal && !showWelcomeModal && !showDictionaryModal;
+    const focused = !showOptionsModal && !showWelcomeModal;
     
     const [practiceLanguage, setPracticeLanguage] = React.useState<string>("es-ES");
     const [preferredLanguage, setPreferredLanguage] = React.useState<string>("en-US");
@@ -45,19 +42,19 @@ const ChatBox: React.FC = () => {
 
     const [speaking, setSpeaking] = React.useState<boolean>(false);
     const [thinking, setThinking] = React.useState<boolean>(false);
-    const [loading, setLoading] = React.useState<boolean>(false);
     
     const getTranslation = async (text: string) => {
         if (practiceLanguage === preferredLanguage) return text;
-                
+        
+        const body = {
+            q: text,
+            source: practiceLanguage,
+            target: preferredLanguage,
+        };
+        
         const res = await axios.post(
             `https://translation.googleapis.com/language/translate/v2?key=${googleCloudApiKey}`, 
-            {
-                q: text,
-                source: practiceLanguage,
-                target: preferredLanguage,
-            },
-        );
+            body);
         return res.data.data.translations[0].translatedText;
     }
     
@@ -65,16 +62,13 @@ const ChatBox: React.FC = () => {
         const translation = await getTranslation(text);
         
         const newMessage: Message = {
-            conversationId,
             fromUser: true,
             source: practiceLanguage as Language,
             target: preferredLanguage as Language,
             text,
             translation,
-            createdAt: new Date(),
         };
         setMessages((oldMessages) => [...oldMessages, newMessage]);
-        saveMessage(newMessage, conversationId);
 
         setThinking(true);
     };
@@ -94,37 +88,29 @@ const ChatBox: React.FC = () => {
         listening,
     } = useSpeechRecognition();
     
-
     const listenContinuously = () => {
-        if (!focused){
-            SpeechRecognition.stopListening();
-            return () => {};
-        };
+        if (showOptionsModal || showOptionsModal) return;
         SpeechRecognition.startListening({
             continuous: true,
             language: practiceLanguage,
         });
-
-        return () => SpeechRecognition.stopListening();
     };
     
-    // listen and set transript
-    React.useEffect(listenContinuously, [focused, practiceLanguage]);
+    React.useEffect(() => setShowWelcomeModal(true), []);
+    React.useEffect(listenContinuously, [showWelcomeModal, showOptionsModal, practiceLanguage]);
     React.useEffect(() => {if (transcript && listening && !thinking && !speaking && focused) setInput(transcript)}, [transcript, listening, thinking, speaking, focused]);
     React.useEffect(() => {
         if (!focused || thinking || speaking) {
             resetTranscript();
             return;
-        };
+        }
         if (finalTranscript) {
             addMessage(finalTranscript);
             resetTranscript();
             setInput("");
-        };
+        }
         // eslint-disable-next-line
     }, [interimTranscript, finalTranscript, messages]);
-
-    // add bot reply
     React.useEffect(() => {
         if (!thinking) return;
         
@@ -143,26 +129,34 @@ const ChatBox: React.FC = () => {
             
             let text: string = '';
 
-            const res = await axios.post(
-                `${process.env.REACT_APP_API_BASE_URL}/chatbot/`,
-                {messages: systemMessage.concat(pastMessages)},
-            );
-            text = res.data.message;
+            // try {
+            //     const res = await axios.post(
+            //         `${process.env.REACT_APP_API_BASE_URL}/chatbot/chat/`,
+            //         {messages: systemMessage.concat(pastMessages)},
+            //     );
+            //     text = res.data.message;
+            // } catch {
+                const completion = await openai.chat.completions.create({
+                    messages: systemMessage.concat(pastMessages),
+                    model: "gpt-3.5-turbo",
+                    max_tokens: 100,
+                });
+                if (completion.choices && completion.choices.length) {
+                    text = completion.choices[0].message.content || '';
+                }
+            // }
 
             const translation = await getTranslation(text);
             
             const newMessage: Message = {
-                conversationId,
                 fromUser: false,
                 source: preferredLanguage as Language,
                 target: practiceLanguage as Language,
                 text,
                 translation,
-                createdAt: new Date(),
             };
     
             setMessages((oldMessages) => [...oldMessages, newMessage]);
-            saveMessage(newMessage, conversationId);
     
             setThinking(false);
             window.scrollTo(0, document.body.scrollHeight || document.documentElement.scrollHeight);
@@ -172,77 +166,6 @@ const ChatBox: React.FC = () => {
 
     // eslint-disable-next-line
     }, [thinking]);
-
-    // save message
-    const saveMessage = async (message: Message, conversationId: number) => {
-        if (!conversationId) {
-            if (email) {
-                await saveConversation();
-            } else {
-                return;
-            };
-        };
-
-        const body = {...message, conversationId};
-        await axios.post(process.env.REACT_APP_API_BASE_URL + "/apples/messages/", body);
-    };
-
-    // save conversation
-    const saveConversation = async () => {
-        if (!email || conversationId) return {};
-        const body = {userName, botName, practiceLanguage, preferredLanguage, startedAt, email};
-        const res = await axios.post(process.env.REACT_APP_API_BASE_URL + "/apples/conversation/", body);
-        setConversationId(() => res.data.id);
-        setStartedAt(new Date(res.data.startedAt));
-
-        // save existing messages
-        for (let message of messages) await saveMessage(message, res.data.id);
-
-        return res.data;
-    };
-
-    // load conversation
-    const loadConversation = async (conversationId: number) => {
-        setLoading(true);
-        setMessages([]);
-
-        const conversationRes = await axios.get(
-            process.env.REACT_APP_API_BASE_URL + 
-            `/apples/conversation/`,
-            {params: {id: conversationId}},
-        );
-        const conversation = conversationRes.data;
-        
-        const messagesRes = await axios.get(
-            process.env.REACT_APP_API_BASE_URL + 
-            `/apples/messages/`, 
-            {params: {conversationId}},
-        );
-        const messages = messagesRes.data;
-
-        setConversationId(conversation.id);
-        setStartedAt(new Date(conversation.startedAt));
-        setUserName(conversation.userName);
-        setBotName(conversation.botName);
-        setPracticeLanguage(conversation.practiceLanguage);
-        setPreferredLanguage(conversation.preferredLanguage);
-        setMessages(messages);
-
-        setTimeout(() => setLoading(() => false), 500);
-    }
-
-    const createNewConversation = async () => {
-        setConversationId(0);
-        setStartedAt(new Date());
-        setUserName("Guest");
-        setBotName("Niki");
-        setPracticeLanguage("es-ES");
-        setPreferredLanguage("en-US");
-        setMessages([]);
-        
-        setShowSessionModal(false);
-        setShowWelcomeModal(true);
-    };
 
     const handleToggleMode = () => {
         setInput("");
@@ -261,17 +184,6 @@ const ChatBox: React.FC = () => {
     if (!SpeechRecognition.browserSupportsSpeechRecognition()) return <h1>Your browser does not support speech recognition software! Try Chrome desktop, maybe?</h1>;
     return (
         <div>
-            <SessionModal
-                showSessionModal={showSessionModal}
-                setShowSessionModal={setShowSessionModal}
-                email={email}
-                setEmail={setEmail}
-                loadConversation={loadConversation}
-                saveConversation={saveConversation}
-                conversationId={conversationId}
-                messagesLength={messages.length}
-                createNewConversation={createNewConversation}
-                />
             <WelcomeModal 
                 showWelcomeModal={showWelcomeModal}
                 setShowWelcomeModal={setShowWelcomeModal}
@@ -283,9 +195,6 @@ const ChatBox: React.FC = () => {
                 setPracticeLanguage={setPracticeLanguage}
                 preferredLanguage={preferredLanguage}
                 setPreferredLanguage={setPreferredLanguage}
-                setShowSessionModal={setShowSessionModal}
-                saveConversation={saveConversation}
-                email={email}
             />
             <OptionsModal
                 showOptionsModal={showOptionsModal}
@@ -304,19 +213,13 @@ const ChatBox: React.FC = () => {
                 originalLanguage={preferredLanguage as Language}
             />
 
-            <h1 className={h1Class}>Chat Ni Ichi</h1><br/>
-
+            <h1 className={h1Class}>Chat Ni Ichi</h1>
+            <br/>
             <button
                 onClick={() => setShowDictionaryModal(!showDictionaryModal)}
-                className={greenButtonClass + ' mr-2'}
+                className={greenButtonClass}
             >
                 Translation Dictionary
-            </button>
-            <button
-                onClick={() => setShowSessionModal(!showSessionModal)}
-                className={greenButtonClass + ' ml-2'}
-            >
-                Manage Conversations
             </button>
 
             <div className="flex justify-center items-center">
@@ -339,7 +242,9 @@ const ChatBox: React.FC = () => {
                         {listening ? '<- This is what I\'ve heard!' : '-> Send your typed message!'}
                     </button>
                 </form>
-            </div><br/>
+            </div>
+
+            <br/>
 
             <div id="main" className="flex">
                 <div id="left" className="p-4 min-w-[320px] flex flex-col items-center">
@@ -371,8 +276,8 @@ const ChatBox: React.FC = () => {
                                 options={options} 
                                 speaking={speaking}
                                 setSpeaking={setSpeaking}
-                                loading={loading}
-                            />)}
+                                />
+                            )}
                         </tbody>
                     </table>
                 </div>
@@ -408,15 +313,9 @@ const ChatBox: React.FC = () => {
             </div>
 
             <h4
-                className="relative bottom-0 text-gray-500 p-4 w-full text-center"
+                className="absolute bottom-0 text-gray-500 p-4 w-full text-center"
             >
-                <p>
-                    Developed by <a className="text-green-700 font-bold" href="https://tinyurl.com/brian-lam">Brian Lam</a>
-                </p>
-                <p>
-                    <a className="text-green-700 font-bold" href="https://www.linkedin.com/in/brian-lam-software-developer/">LinkedIn</a>
-                    {" | "}<a className="text-green-700 font-bold" href="https://github.com/cb299792458/hablabaa">GitHub</a>
-                </p>
+                Developed by <a className="text-blue-500 font-bold" href="https://www.linkedin.com/in/brian-lam-software-developer/">Brian Lam</a>
             </h4>
         </div>
     );
