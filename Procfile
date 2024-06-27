@@ -1,1 +1,1 @@
-web: python manage.py migrate && gunicorn hablabaa-backend.wsg
+web: gunicorn backend.core.wsgi:application --log-file -
