@@ -104,8 +104,6 @@ const ChatBox: React.FC = () => {
             continuous: true,
             language: practiceLanguage,
         });
-
-        return () => SpeechRecognition.stopListening();
     };
     
     // listen and set transript
