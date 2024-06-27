@@ -144,7 +144,7 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CORS_ALLOWED_ORIGINS = ['http://localhost:3000', 'http://127.0.0.1:3000']
+CORS_ALLOWED_ORIGINS = ['http://localhost:3000', 'http://127.0.0.1:3000', "https://hablabaa-production-783b.up.railway.app",]
 
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
@@ -153,3 +153,4 @@ STATICFILES_DIRS = [
 ]
 
 ALLOWED_HOSTS = ['*', 'hablabaa-production-783b.up.railway.app']
+ALLOWED_HOST = ['*']
