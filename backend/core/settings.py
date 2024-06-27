@@ -22,7 +22,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: don't run with debug turned on in production!
 
-ALLOWED_HOSTS = ['*', 'hablabaa-production-783b.up.railway.app']
 
 import environ
 import os
@@ -152,3 +151,5 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
+
+ALLOWED_HOSTS = ['*', 'hablabaa-production-783b.up.railway.app']
