@@ -1,1 +1,1 @@
-web: python3 manage.py migrate && gunicorn hablabaa-backend.wsg
+web: python manage.py migrate && gunicorn hablabaa-backend.wsg
