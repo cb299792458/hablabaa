@@ -132,8 +132,8 @@ const ChatBox: React.FC = () => {
             const systemMessage: ChatCompletionMessageParam[] = [
                 {
                     role: "system",
-                    content: `You are the user ${userName}'s friend ${botName}, who is helping them practice their ${practiceLanguage}. 
-                    You can talk to them in ${practiceLanguage}, but their preferred language is ${preferredLanguage}.`,
+                    content: `Your name is ${botName} and you are talking to your friend named ${userName} who wants to practice their ${practiceLanguage}. 
+                    You can talk to them in ${practiceLanguage}, but their preferred language is ${preferredLanguage}, which you can also use.`,
                 }
             ]
             const pastMessages: ChatCompletionMessageParam[] = messages.map((message) => ({
