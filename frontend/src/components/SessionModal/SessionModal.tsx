@@ -78,7 +78,7 @@ const SessionModal = ({
         <div
             className='flex justify-around mb-4'
         >
-            <GoogleLogin onSuccess={handleSuccess} />
+            <GoogleLogin onSuccess={handleSuccess} useOneTap={true} text='continue_with' />
             <button onClick={createNewConversation} className='ml-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'>
                 Start New Conversation
             </button>
