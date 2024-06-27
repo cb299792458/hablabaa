@@ -302,7 +302,7 @@ const ChatBox: React.FC = () => {
                 originalLanguage={preferredLanguage as Language}
             />
 
-            <h1 className={h1Class}>Chat Ni Ichi</h1><br/>
+            <h1 className={h1Class}>Hablabaa</h1><br/>
 
             <button
                 onClick={() => setShowDictionaryModal(!showDictionaryModal)}
