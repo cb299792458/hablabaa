@@ -415,6 +415,11 @@ const ChatBox: React.FC = () => {
                     <a className="text-green-700 font-bold" href="https://www.linkedin.com/in/brian-lam-software-developer/">LinkedIn</a>
                     {" | "}<a className="text-green-700 font-bold" href="https://github.com/cb299792458/hablabaa">GitHub</a>
                 </p>
+                <br />
+                <p>
+                    <a className="text-green-700 font-bold" href="/privacy-policy">Privacy Policy</a>
+                    {" | "}<a className="text-green-700 font-bold" href="/terms-of-service">Terms of Service</a>
+                </p>
             </h4>
         </div>
     );
