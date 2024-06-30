@@ -46,6 +46,11 @@ const ChatBox: React.FC = () => {
     const [speaking, setSpeaking] = React.useState<boolean>(false);
     const [thinking, setThinking] = React.useState<boolean>(false);
     const [loading, setLoading] = React.useState<boolean>(false);
+
+    const scrollChat = () => {
+        const chat = document.getElementById("center");
+        if (chat) chat.scrollTop = chat.scrollHeight;
+    };
     
     const getTranslation = async (text: string) => {
         if (practiceLanguage === preferredLanguage) return text;
@@ -77,6 +82,7 @@ const ChatBox: React.FC = () => {
         saveMessage(newMessage, conversationId);
 
         setThinking(true);
+        setTimeout(scrollChat, 100);
     };
     
     const sendMessage = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -163,7 +169,7 @@ const ChatBox: React.FC = () => {
             saveMessage(newMessage, conversationId);
     
             setThinking(false);
-            window.scrollTo(0, document.body.scrollHeight || document.documentElement.scrollHeight);
+            setTimeout(scrollChat, 100);
         };
 
         delay(addReply, 1000); // wait 1000 ms for "thinking"
@@ -258,7 +264,7 @@ const ChatBox: React.FC = () => {
 
     if (!SpeechRecognition.browserSupportsSpeechRecognition()) return <h1>Your browser does not support speech recognition software! Try Chrome desktop, maybe?</h1>;
     return (
-        <div>
+        <div className="h-screen flex flex-col">
             <SessionModal
                 showSessionModal={showSessionModal}
                 setShowSessionModal={setShowSessionModal}
@@ -304,18 +310,20 @@ const ChatBox: React.FC = () => {
 
             <h1 className={h1Class}>Hablabaa</h1><br/>
 
-            <button
-                onClick={() => setShowDictionaryModal(!showDictionaryModal)}
-                className={greenButtonClass + ' mr-2'}
-            >
-                Translation Dictionary
-            </button>
-            <button
-                onClick={() => setShowSessionModal(!showSessionModal)}
-                className={greenButtonClass + ' ml-2'}
-            >
-                Manage Conversations
-            </button>
+            <div>
+                <button
+                    onClick={() => setShowDictionaryModal(!showDictionaryModal)}
+                    className={greenButtonClass + ' mr-2'}
+                >
+                    Translation Dictionary
+                </button>
+                <button
+                    onClick={() => setShowSessionModal(!showSessionModal)}
+                    className={greenButtonClass + ' ml-2'}
+                >
+                    Manage Conversations
+                </button>
+            </div>
 
             <div className="flex justify-center items-center">
                 <button onClick={undoLastMessages}
@@ -337,9 +345,9 @@ const ChatBox: React.FC = () => {
                         {listening ? '<- This is what I\'ve heard!' : '-> Send your typed message!'}
                     </button>
                 </form>
-            </div><br/>
+            </div>
 
-            <div id="main" className="flex">
+            <div id="main" className="flex-grow flex overflow-y-auto">
                 <div id="left" className="p-4 min-w-[320px] flex flex-col items-center">
                     <img src="default.png" alt="default" width={250}/>
                     <span>{userName}</span>
@@ -351,7 +359,7 @@ const ChatBox: React.FC = () => {
                     </button>
                 </div>
 
-                <div id="center" className="p-4 flex-grow">
+                <div id="center" className="p-4 flex-grow overflow-y-scroll">
                     <table className="min-w-full">
                         <thead>
                             <tr>
@@ -405,22 +413,23 @@ const ChatBox: React.FC = () => {
                 </div>
             </div>
 
-            <h4
-                className="relative bottom-0 text-gray-500 p-4 w-full text-center"
-            >
-                <p>
-                    Developed by <a className="text-green-700 font-bold" href="https://tinyurl.com/brian-lam">Brian Lam</a>
-                </p>
-                <p>
-                    <a className="text-green-700 font-bold" href="https://www.linkedin.com/in/brian-lam-software-developer/">LinkedIn</a>
-                    {" | "}<a className="text-green-700 font-bold" href="https://github.com/cb299792458/hablabaa">GitHub</a>
-                </p>
-                <br />
-                <p>
-                    <a className="text-green-700 font-bold" href="/privacy-policy">Privacy Policy</a>
-                    {" | "}<a className="text-green-700 font-bold" href="/terms-of-service">Terms of Service</a>
-                </p>
-            </h4>
+            <div >
+                <h4
+                    className="relative bottom-0 text-gray-500 p-4 w-full text-center"
+                >
+                    <p>
+                        Developed by <a className="text-green-700 font-bold" href="https://tinyurl.com/brian-lam">Brian Lam</a>
+                    </p>
+                    <p>
+                        <a className="text-green-700 font-bold" href="https://www.linkedin.com/in/brian-lam-software-developer/">LinkedIn</a>
+                        {" | "}<a className="text-green-700 font-bold" href="https://github.com/cb299792458/hablabaa">GitHub</a>
+                    </p>
+                    <p>
+                        <a className="text-green-700 font-bold" href="/privacy-policy">Privacy Policy</a>
+                        {" | "}<a className="text-green-700 font-bold" href="/terms-of-service">Terms of Service</a>
+                    </p>
+                </h4>
+            </div>
         </div>
     );
 };
