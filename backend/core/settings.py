@@ -97,7 +97,7 @@ DATABASES = {
         'USER': 'postgres',
         'PASSWORD': POSTGRES_PASSWORD,
         'HOST': 'viaduct.proxy.rlwy.net',
-        'PORT': '25244',
+        'PORT': '13634',
     }
 }
 
