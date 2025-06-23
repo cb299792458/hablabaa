@@ -38,6 +38,7 @@ export enum Language {
     Japanese = 'ja-JP',
     Korean = 'ko-KR',
     Thai = 'th-TH',
+    Ukrainian = 'uk-UA',
     Vietnamese = 'vi-VN',
 }
 

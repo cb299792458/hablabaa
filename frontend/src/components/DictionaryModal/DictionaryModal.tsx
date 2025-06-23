@@ -84,7 +84,7 @@ const DictionaryModal = ({
                 </div>
 
                 <div className="m-2">
-                    <FontAwesomeIcon icon={faRightLeft} onClick={swap} />
+                    <FontAwesomeIcon icon={faRightLeft} onClick={swap} className="cursor-pointer"/>
                 </div>
 
                 <div className="flex flex-col items-center m-2">
